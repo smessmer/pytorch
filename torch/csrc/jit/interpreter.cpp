@@ -14,6 +14,8 @@
 #include "torch/csrc/jit/fusion_compiler.h"
 #include "torch/csrc/jit/graph_executor.h"
 
+#include <typeinfo>
+
 namespace py = pybind11;
 
 namespace torch { namespace jit {
@@ -248,6 +250,23 @@ Operation getOperation(jit::Node *node) {
       }
       result->retain();
       outputs.push_back(result);
+    };
+  IR_ELSEIF(Print)
+    return [](const list_of_retainable & inputs, list_of_retainable & outputs) {
+      bool first = true;
+      for (at::Retainable* i : inputs) {
+        if (!first) std::cout << " ";
+        first = false;
+        if (auto tensor_impl = dynamic_cast<at::TensorImpl*>(i)) {
+          std::cout << at::Tensor(tensor_impl, true);
+        } else if (!i) {
+          std::cout << "<nullptr>";
+        } else {
+          std::cout << "<" << typeid(*i).name() << " at " << i << ">";
+        }
+      }
+      std::cout << std::endl;
+      outputs.clear();
     };
   IR_ELSEIF(GraphExecutor)
     GraphExecutor executor(value->g(kSubgraph));
