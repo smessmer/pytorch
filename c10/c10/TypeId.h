@@ -1,9 +1,13 @@
 #pragma once
 
 #include <cstdint>
+<<<<<<< Updated upstream
 #include <ostream>
 
 namespace c10 {
+=======
+#include <functional>
+>>>>>>> Stashed changes
 
 // A compact identifier which stores all of the information necessary to
 // carry out a dispatch on a type.  This is NOT NECESSARILY in one-to-one
@@ -27,6 +31,7 @@ namespace c10 {
 // extensible backends more easily and is a pretty battle-tested piece of code.
 class TypeId final {
   const int64_t id_;
+<<<<<<< Updated upstream
   const char* name_;
 
   explicit constexpr TypeId(int64_t id, const char* name) noexcept : id_(id), name_(name) {}
@@ -42,6 +47,29 @@ public:
 inline std::ostream& operator<<(std::ostream& out, TypeId id) {
   out << id.name();
   return out;
+=======
+  explicit constexpr TypeId(int64_t id) noexcept : id_(id) {}
+
+  friend class TypeIds;
+  friend constexpr bool operator==(TypeId, TypeId) noexcept;
+  friend struct std::hash<TypeId>;
+};
+
+constexpr inline bool operator==(TypeId lhs, TypeId rhs) noexcept {
+  return lhs.id_ == rhs.id_;
+}
+
+constexpr inline bool operator!=(TypeId lhs, TypeId rhs) noexcept {
+  return !operator==(lhs, rhs);
+}
+
+namespace std {
+  template<> struct hash<TypeId> {
+    constexpr size_t operator()(TypeId typeId) const {
+      return typeId.id_;
+    }
+  };
+>>>>>>> Stashed changes
 }
 
 class TypeIds final {
