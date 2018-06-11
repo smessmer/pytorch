@@ -165,8 +165,10 @@ static void Caffe2InitializeCuda() {
   RegisterTensorInfoFunction(
       TypeMeta::Id<Tensor<CUDAContext>>(), GetCUDATensorInfo);
 
+#ifdef CAFFE2_USE_CUDNN
   // Check the versions of cuDNN that were compiled and linked with are compatible
   CheckCuDNNVersions();
+#endif // CAFFE2_USE_CUDNN
 }
 
 static void SetUpCub() {
