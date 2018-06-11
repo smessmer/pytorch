@@ -124,11 +124,6 @@ CMAKE_ARGS+=("-DUSE_OBSERVERS=ON")
 CMAKE_ARGS+=("-DUSE_ZSTD=ON")
 CMAKE_ARGS+=("-DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}")
 
-if [[ $BUILD_ENVIRONMENT == *-aten-* ]]; then
-  if [[ CMAKE_ARGS != *USE_ATEN* ]] && [[ CMAKE_ARGS != *BUILD_ATEN* ]]; then
-    CMAKE_ARGS+=("-DBUILD_ATEN=ON")
-  fi
-fi
 if [[ $BUILD_ENVIRONMENT == *mkl* ]]; then
   CMAKE_ARGS+=("-DBLAS=MKL")
 fi
