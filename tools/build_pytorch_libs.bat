@@ -180,6 +180,8 @@ goto:eof
                   -DUSE_CUDA=%USE_CUDA% ^
                   -DUSE_CUDNN=OFF ^
                   -DUSE_NNPACK=%USE_NNPACK% ^
+                  -DUSE_GLOG=OFF ^
+                  -DUSE_GFLAGS=OFF ^
                   -DCUDNN_INCLUDE_DIR="%CUDNN_INCLUDE_DIR%" ^
                   -DCUDNN_LIB_DIR="%CUDNN_LIB_DIR%" ^
                   -DCUDNN_LIBRARY="%CUDNN_LIBRARY%" ^
