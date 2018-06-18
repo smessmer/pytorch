@@ -393,6 +393,12 @@ endif()
 # ---[ Android specific ones
 if(ANDROID)
   list(APPEND Caffe2_DEPENDENCY_LIBS log)
+  set( COMPILER_WORKS_EXITCODE 
+       "PLEASE_FILL_OUT-FAILED_TO_RUN"
+       CACHE STRING "Result from TRY_RUN" FORCE)
+  set( HAS_GCC_ATOMICS_EXITCODE 
+       "PLEASE_FILL_OUT-FAILED_TO_RUN"
+       CACHE STRING "Result from TRY_RUN" FORCE)
 endif()
 
 # ---[ CUDA
