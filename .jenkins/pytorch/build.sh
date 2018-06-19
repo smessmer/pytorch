@@ -58,7 +58,6 @@ WERROR=1 python setup.py install
 
 # Add the test binaries so that they won't be git clean'ed away
 git add -f build/bin
-git add -f aten_install/test
 
 # Testing ATen install
 if [[ "$BUILD_ENVIRONMENT" != *cuda* ]]; then
