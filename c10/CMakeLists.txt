@@ -26,16 +26,19 @@ else()
         -Wmissing-include-dirs
         -Woverloaded-virtual
         -Wredundant-decls
-        -Wshadow
+        -Wno-shadow
         -Wsign-promo
         -Wstrict-overflow=5
         -fdiagnostics-show-option
-        -Wconversion
+        -Wno-conversion
         -Wpedantic
-        -Wno-gnu-zero-variadic-macro-arguments
         -Wundef
         -Werror
         )
+endif()
+
+if(APPLE)
+  set(WARNING_OPTIONS -Wno-gnu-zero-variadic-macro-arguments)
 endif()
 
 add_library(${PROJECT_NAME} OBJECT ${LIB_SOURCES})
