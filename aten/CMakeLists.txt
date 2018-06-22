@@ -1,5 +1,6 @@
 if (NOT CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
   cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+  project(ATen CXX C)
   include(CMakeDependentOption)
   option(USE_CUDA "Use CUDA" ON)
   option(USE_ROCM "Use ROCm" OFF)
@@ -9,9 +10,6 @@ if (NOT CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
       "USE_CUDA" OFF)
   option(ATEN_NO_TEST "Do not build ATen test binaries" OFF)
 endif()
-
-# Create the project in all cases
-project(ATen CXX C)
 
 # Find modules
 list(APPEND CMAKE_MODULE_PATH

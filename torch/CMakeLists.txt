@@ -219,6 +219,7 @@ set(TORCH_SRCS
   ${TORCH_SRC_DIR}/csrc/jit/passes/shape_analysis.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/canonicalize.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/dead_code_elimination.cpp
+  ${TORCH_SRC_DIR}/csrc/jit/passes/erase_number_types.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/lower_tuples.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/peephole.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/inplace_check.cpp
@@ -238,7 +239,7 @@ set(TORCH_SRCS
   ${TORCH_SRC_DIR}/csrc/jit/export.cpp
   ${TORCH_SRC_DIR}/csrc/jit/import.cpp
   ${TORCH_SRC_DIR}/csrc/onnx/onnx.cpp
-  ${TORCH_SRC_DIR}/csrc/onnx/onnx.pb.cpp
+  ${TORCH_SRC_DIR}/csrc/onnx/onnx.npb.cpp
   ${TORCH_SRC_DIR}/csrc/torch.cpp)
 
 if (NOT NO_API)

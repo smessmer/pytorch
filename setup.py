@@ -774,6 +774,7 @@ main_sources = [
     "torch/csrc/jit/passes/canonicalize.cpp",
     "torch/csrc/jit/passes/batch_mm.cpp",
     "torch/csrc/jit/passes/decompose_addmm.cpp",
+    "torch/csrc/jit/passes/erase_number_types.cpp",
     "torch/csrc/jit/passes/loop_unrolling.cpp",
     "torch/csrc/jit/passes/onnx/peephole.cpp",
     "torch/csrc/jit/passes/onnx/fixup_onnx_loop.cpp",
@@ -816,7 +817,7 @@ main_sources = [
     "torch/csrc/autograd/functions/init.cpp",
     "torch/csrc/nn/THNN.cpp",
     "torch/csrc/tensor/python_tensor.cpp",
-    "torch/csrc/onnx/onnx.pb.cpp",
+    "torch/csrc/onnx/onnx.npb.cpp",
     "torch/csrc/onnx/onnx.cpp",
     "torch/csrc/onnx/init.cpp",
 ]
