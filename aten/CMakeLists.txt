@@ -9,6 +9,10 @@ if (NOT CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
       USE_CUDNN "Use cuDNN" ON
       "USE_CUDA" OFF)
   option(ATEN_NO_TEST "Do not build ATen test binaries" OFF)
+else()
+  if (ANDROID OR IOS)
+    return()
+  endif()
 endif()
 
 # Find modules
