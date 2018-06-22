@@ -276,7 +276,7 @@ function(target_enable_style_warnings TARGET)
             -Wredundant-decls
             -Wno-shadow
             -Wsign-promo
-            -Wstrict-overflow=5
+            -Wno-strict-overflow
             -fdiagnostics-show-option
             -Wno-conversion
             -Wpedantic
