@@ -6,9 +6,9 @@
  * access methods
  ******************************************************************************/
 
-int THSTensor_(nDimension)(const THSTensor *self)
+int THSTensor_(_nDimension)(const THSTensor *self)
 {
-  THError("Internal error! THSTensor_(nDimension)(self) shouldn't be called; use self.dim() instead");
+  THError("Internal error! THSTensor_(_nDimension)(self) shouldn't be called; use self.dim() instead");
 }
 
 int THSTensor_(nDimensionI)(const THSTensor *self)
@@ -133,11 +133,6 @@ THSTensor *THSTensor_(newTranspose)(THSTensor *self, int d1, int d2) {
  ******************************************************************************/
 
 int THSTensor_(isSameSizeAs)(const THSTensor *self, const THSTensor* src)
-{
-  THError("Internal error! This API is deprecated. Shout if you need it.");
-}
-
-THSTensor *THSTensor_(resizeLegacy)(THSTensor *self, THLongStorage *size)
 {
   THError("Internal error! This API is deprecated. Shout if you need it.");
 }

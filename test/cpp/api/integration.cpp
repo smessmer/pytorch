@@ -172,7 +172,7 @@ bool test_mnist(
     /* int label_magic = */ rd.read_int();
     int label_count = rd.read_int();
 
-    auto data = torch::empty({label_count}, at::kLong);
+    auto data = torch::empty({label_count}, torch::kInt64);
     auto a_data = data.accessor<int64_t, 1>();
 
     for (int i = 0; i < label_count; ++i) {
@@ -203,7 +203,8 @@ bool test_mnist(
     const auto backend = useGPU ? at::kCUDA : at::kCPU;
     auto inp =
         torch::empty({batch_size, 1, trdata.size(2), trdata.size(3)}, backend);
-    auto lab = torch::empty({batch_size}, at::device(backend).dtype(at::kLong));
+    auto lab =
+        torch::empty({batch_size}, at::device(backend).dtype(torch::kInt64));
     for (auto p = 0U; p < shuffled_inds.size() - batch_size; p++) {
       inp[p % batch_size] = trdata[shuffled_inds[p]];
       lab[p % batch_size] = trlabel[shuffled_inds[p]];
@@ -224,7 +225,7 @@ bool test_mnist(
 
   NoGradGuard guard;
   auto result = std::get<1>(forward_op(tedata).max(1));
-  Variable correct = (result == telabel).toType(at::kFloat);
+  Variable correct = (result == telabel).toType(torch::kFloat32);
   std::cout << "Num correct: " << correct.data().sum().toCFloat() << " out of"
             << telabel.size(0) << std::endl;
   return correct.data().sum().toCFloat() > telabel.size(0) * 0.8;
@@ -236,9 +237,9 @@ TEST_CASE("integration") {
         << "Training episodic policy gradient with a critic for up to 3000"
            " episodes, rest your eyes for a bit!\n";
     auto model = std::make_shared<SimpleContainer>();
-    auto linear = model->add(Linear(4, 128).build(), "linear");
-    auto policyHead = model->add(Linear(128, 2).build(), "policy");
-    auto valueHead = model->add(Linear(128, 1).build(), "action");
+    auto linear = model->add(Linear(4, 128), "linear");
+    auto policyHead = model->add(Linear(128, 2), "policy");
+    auto valueHead = model->add(Linear(128, 1), "action");
     auto optim = Adam(model, 1e-3).make();
 
     std::vector<Variable> saved_log_probs;
@@ -274,9 +275,7 @@ TEST_CASE("integration") {
         rewards[i] = R;
       }
       auto r_t =
-          at::CPU(at::kFloat)
-              .tensorFromBlob(
-                  rewards.data(), {static_cast<int64_t>(rewards.size())});
+          at::from_blob(rewards.data(), {static_cast<int64_t>(rewards.size())});
       r_t = (r_t - r_t.mean()) / (r_t.std() + 1e-5);
 
       std::vector<at::Tensor> policy_loss;
@@ -333,12 +332,12 @@ TEST_CASE("integration") {
 
 TEST_CASE("integration/mnist", "[cuda]") {
   auto model = std::make_shared<SimpleContainer>();
-  auto conv1 = model->add(Conv2d(1, 10, 5).build(), "conv1");
-  auto conv2 = model->add(Conv2d(10, 20, 5).build(), "conv2");
-  auto drop = Dropout(0.3).build();
-  auto drop2d = Dropout2d(0.3).build();
-  auto linear1 = model->add(Linear(320, 50).build(), "linear1");
-  auto linear2 = model->add(Linear(50, 10).build(), "linear2");
+  auto conv1 = model->add(Conv2d(1, 10, 5), "conv1");
+  auto conv2 = model->add(Conv2d(10, 20, 5), "conv2");
+  auto drop = Dropout(0.3);
+  auto drop2d = Dropout2d(0.3);
+  auto linear1 = model->add(Linear(320, 50), "linear1");
+  auto linear2 = model->add(Linear(50, 10), "linear2");
 
   auto forward = [&](Variable x) {
     x = std::get<0>(at::max_pool2d(conv1->forward({x})[0], {2, 2}))
@@ -368,14 +367,14 @@ TEST_CASE("integration/mnist", "[cuda]") {
 
 TEST_CASE("integration/mnist/batchnorm", "[cuda]") {
   auto model = std::make_shared<SimpleContainer>();
-  auto conv1 = model->add(Conv2d(1, 10, 5).build(), "conv1");
+  auto conv1 = model->add(Conv2d(1, 10, 5), "conv1");
   auto batchnorm2d =
-      model->add(BatchNorm(10).stateful(true).build(), "batchnorm2d");
-  auto conv2 = model->add(Conv2d(10, 20, 5).build(), "conv2");
-  auto linear1 = model->add(Linear(320, 50).build(), "linear1");
+      model->add(BatchNorm(BatchNormOptions(10).stateful(true)), "batchnorm2d");
+  auto conv2 = model->add(Conv2d(10, 20, 5), "conv2");
+  auto linear1 = model->add(Linear(320, 50), "linear1");
   auto batchnorm1 =
-      model->add(BatchNorm(50).stateful(true).build(), "batchnorm1");
-  auto linear2 = model->add(Linear(50, 10).build(), "linear2");
+      model->add(BatchNorm(BatchNormOptions(50).stateful(true)), "batchnorm1");
+  auto linear2 = model->add(Linear(50, 10), "linear2");
 
   auto forward = [&](Variable x) {
     x = std::get<0>(at::max_pool2d(conv1->forward({x})[0], {2, 2}))

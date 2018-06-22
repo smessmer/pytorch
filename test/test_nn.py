@@ -11,6 +11,8 @@ from itertools import repeat, product
 from functools import wraps, reduce
 from operator import mul
 from collections import OrderedDict
+import hashlib
+import os
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -7606,6 +7608,21 @@ add_test(NewModuleTest(
     constructor=lambda: _AdaptiveLogSoftmaxWithLoss(16, 10, [2, 6]),
     input_size=(4, 16),
     fullname='AdaptiveLogSoftmax'))
+
+
+num_shards = os.environ.get('TEST_NN_NUM_SHARDS', None)
+shard = os.environ.get('TEST_NN_SHARD', None)
+if num_shards is not None and shard is not None:
+    num_shards = int(num_shards)
+    shard = int(shard)
+
+    def load_tests(loader, tests, pattern):
+        test_suite = unittest.TestSuite()
+        for test_group in tests:
+            for test in test_group:
+                if int(hashlib.sha256(str(test).encode('utf-8')).hexdigest(), 16) % num_shards == shard:
+                    test_suite.addTest(test)
+        return test_suite
 
 
 if __name__ == '__main__':
