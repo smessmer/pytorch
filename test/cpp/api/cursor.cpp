@@ -1,6 +1,5 @@
 #include <catch.hpp>
 
-#include <torch/functions.h>
 #include <torch/nn/cursor.h>
 #include <torch/nn/module.h>
 #include <torch/tensor.h>
@@ -12,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-using namespace torch;
 using namespace torch::nn;
 using namespace torch::detail;
 
@@ -24,8 +22,8 @@ struct TestModule : public torch::nn::Module {
     tensor2 = register_parameter("tensor2", torch::randn({size}));
   }
 
-  autograd::Variable tensor1;
-  autograd::Variable tensor2;
+  torch::Tensor tensor1;
+  torch::Tensor tensor2;
 };
 
 struct Container : public torch::nn::Module {
@@ -249,7 +247,7 @@ TEST_CASE("cursor/parameter") {
       size_t count = 0;
       cursor.apply_items(
           [&count, &model, &first, &second](
-              const std::string& key, autograd::Variable& tensor) {
+              const std::string& key, torch::Tensor& tensor) {
             switch (count) {
               case 0: {
                 REQUIRE(tensor.equal(first->tensor1));
@@ -324,4 +322,40 @@ TEST_CASE("cursor/parameter") {
       REQUIRE(++iterator == cursor.end());
     }
   }
+}
+
+TEST_CASE("cursor/non-const-to-const-conversion") {
+  auto first = std::make_shared<TestModule>(1);
+  auto second = std::make_shared<TestModule>(2);
+  Container model(first, second);
+
+  {
+    ConstModuleCursor const_cursor(model.modules());
+    {
+      ModuleCursor cursor = model.modules();
+      ConstModuleCursor const_cursor = cursor;
+    }
+  }
+  {
+    ConstParameterCursor const_cursor(model.parameters());
+    {
+      ParameterCursor cursor = model.parameters();
+      ConstParameterCursor const_cursor = cursor;
+    }
+  }
+  {
+    ConstBufferCursor const_cursor(model.buffers());
+    {
+      BufferCursor cursor = model.buffers();
+      ConstBufferCursor const_cursor = cursor;
+    }
+  }
+}
+
+TEST_CASE("cursor/can-invoke-const-method-on-const-cursor") {
+  TestModule model(1);
+
+  /// This will only compile if `Cursor` has the appropriate const methods.
+  const auto cursor = model.parameters();
+  REQUIRE(cursor.contains("tensor1"));
 }

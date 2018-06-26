@@ -7,13 +7,8 @@
 
 // ${generated_comment}
 
-#include "ATen/${Storage}.h"
-#include "ATen/${Tensor}.h"
+$storage_tensor_headers
 #include "ATen/${Generator}.h"
-#include "ATen/${Backend}ByteTensor.h"
-#include "ATen/${Backend}IntTensor.h"
-#include "ATen/${Backend}LongTensor.h"
-#include "ATen/${SparseTensor}.h"
 #include "ATen/${DenseTensor}.h"
 #include "ATen/${DenseBackend}LongTensor.h"
 #include "ATen/Allocator.h"

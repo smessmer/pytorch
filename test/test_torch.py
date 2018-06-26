@@ -263,6 +263,7 @@ class TestTorch(TestCase):
         if input is None:
             input = []
             input.append(list(range(-5, 5)))
+            input.append([0 for x in range(-5, 5)])
             input.append([x + 1e-6 for x in range(-5, 5)])
             # Some vectorized implementations don't support large ranges
             input.append([x + 1e10 for x in range(-5, 5)])
@@ -6206,6 +6207,17 @@ class TestTorch(TestCase):
                     # that the elements flagged positive are indeed non-zero.
                     for i in range(dst1.size(0)):
                         self.assertNotEqual(tensor[dst1[i, 0], dst1[i, 1], dst1[i, 2]].item(), 0)
+
+    def test_nonzero_empty(self):
+        if not torch._C._use_zero_size_dim():
+            return
+
+        devices = ['cpu'] if not torch.cuda.is_available() else ['cpu', 'cuda']
+        for device in devices:
+            x = torch.randn(0, 2, 0, 5, 0, device=device)
+            y = torch.nonzero(x)
+            self.assertEqual(0, y.numel())
+            self.assertEqual(torch.Size([0, 5]), y.shape)
 
     def test_deepcopy(self):
         from copy import deepcopy

@@ -37,8 +37,8 @@ find_library(CAFFE2_GPU_LIBRARY caffe2_gpu
 find_library(PROTOBUF_LIBRARY protobuf
   NAMES libprotobuf.a libprotobufd.a libprotobuf.lib libprotobufd.lib
   PATHS ${CAFFE2_BUILD_LIB_DIR} NO_DEFAULT_PATH)
-find_library(NANOPB_LIBRARY protobuf-nanopb
-  PATHS ${NANOPB_BUILD_PATH} NO_DEFAULT_PATH)
+
+add_subdirectory(../third_party/nanopb protobuf-nanopb)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -53,9 +53,6 @@ if(USE_CUDA)
     /usr/lib/x86_64-linux-gnu/
     ${CMAKE_MODULE_PATH})
   set(CMAKE_LIBRARY_PATH /usr/lib/x86_64-linux-gnu/ ${CMAKE_LIBRARY_PATH})
-
-  # Polyfill for upstream FindCUDA
-  include(CMakeInitializeConfigs)
 
   if(NOT CUDA_FOUND)
     find_package(CUDA 7.0)
@@ -158,6 +155,7 @@ add_custom_command(
   "${TORCH_SRC_DIR}/csrc/autograd/generated/python_nn_functions.cpp"
   "${TORCH_SRC_DIR}/csrc/autograd/generated/python_nn_functions.h"
   "${TORCH_SRC_DIR}/csrc/autograd/generated/python_nn_functions_dispatch.h"
+  "${TORCH_SRC_DIR}/csrc/autograd/generated/variable_factories.h"
   "${TORCH_SRC_DIR}/csrc/jit/generated/aten_dispatch.cpp"
   "${TORCH_SRC_DIR}/csrc/jit/generated/aten_schema.cpp"
   "${TORCH_SRC_DIR}/csrc/jit/generated/aten_interned_strings.h"
@@ -181,6 +179,7 @@ add_custom_command(
   "${TOOLS_PATH}/autograd/templates/python_nn_functions.cpp"
   "${TOOLS_PATH}/autograd/templates/python_nn_functions.h"
   "${TOOLS_PATH}/autograd/templates/python_nn_functions_dispatch.h"
+  "${TOOLS_PATH}/autograd/templates/variable_factories.h"
   "${TOOLS_PATH}/autograd/gen_autograd.py"
   "${TOOLS_PATH}/autograd/gen_autograd_functions.py"
   "${TOOLS_PATH}/autograd/gen_variable_type.py"
@@ -221,12 +220,14 @@ set(TORCH_SRCS
   ${TORCH_SRC_DIR}/csrc/jit/passes/dead_code_elimination.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/erase_number_types.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/lower_tuples.cpp
+  ${TORCH_SRC_DIR}/csrc/jit/passes/lower_grad_of.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/peephole.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/inplace_check.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/batch_mm.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/create_autodiff_subgraphs.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/remove_expands.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/decompose_addmm.cpp
+  ${TORCH_SRC_DIR}/csrc/jit/passes/specialize_undef.cpp
   ${TORCH_SRC_DIR}/csrc/jit/passes/loop_unrolling.cpp
   ${TORCH_SRC_DIR}/csrc/jit/interned_strings.cpp
   ${TORCH_SRC_DIR}/csrc/jit/script/compiler.cpp
@@ -290,7 +291,7 @@ target_link_libraries(torch
   ${TORCH_CUDA_LIBRARIES}
   ${CAFFE2_LIBRARY}
   ${PROTOBUF_LIBRARY}
-  ${NANOPB_LIBRARY}
+  protobuf-nanopb
 )
 if(USE_CUDA)
   if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
