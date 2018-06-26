@@ -4,8 +4,9 @@
 #include "caffe2/utils/Array.h"
 
 namespace caffe2 {
+namespace ops {
 
-struct SigmoidOp final {
+struct Sigmoid final {
     static constexpr const char* name = "sigmoid";
     
     using Signature = void(Tensor<CPUContext> input, Tensor<CPUContext>* output);
@@ -13,4 +14,5 @@ struct SigmoidOp final {
     static constexpr c10::guts::array<const char*, 2> parameter_names = {{"input", "output"}};
 };
 
-}
+} // namespace ops
+} // namespace caffe2
