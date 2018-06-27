@@ -283,6 +283,7 @@ function(target_enable_style_warnings TARGET)
             -Wno-conversion
             -Wpedantic
             -Wundef
+	    -Wno-maybe-uninitialized
             )
     # -Wno-gnu-zero-variadic-macro-arguments is not available in GCC-4.8.5. Set
     # only when using clang.
