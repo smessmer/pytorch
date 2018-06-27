@@ -25,14 +25,15 @@ public:
     USE_OPERATOR_CONTEXT_FUNCTIONS;
 
     bool RunOnDevice() override {
-        RunOnDevice_(c10::guts::make_index_sequence<Schema::signature::num_args - 2>());
+        RunOnDevice_(c10::guts::make_index_sequence<Schema::signature::num_args - 3>());
         return true;
     }
 
 private:
     template<size_t... InputIndex>
     void RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
-        c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0), &state_);
+        // TODO Handle context in a better way (and change the -3 in RunOnDevice() above back to -2)
+        c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0), &state_, &context_);
     }
 
     State state_;
