@@ -5,6 +5,16 @@
 
 namespace caffe2 {
 
+namespace details {
+template<size_t...> struct true_t : std::true_type {};
+template<class State> inline std::unique_ptr<State> init_state() {
+    return c10::guts::make_unique<State>();
+}
+template<> inline std::unique_ptr<void> init_state<void>() {
+    return std::unique_ptr<void>();
+}
+}
+
 /**
  * To make a c10 operator "C10Add" callable from caffe2 as "C2MyAddOpName", just write
  *
@@ -19,46 +29,50 @@ template<class OpSchemaDef, class Context, class State>
 class C10OperatorWrapper final : public Operator<Context> {
     using Schema = c10::OpSchema<OpSchemaDef>;
 public:
-    C10OperatorWrapper(const OperatorDef& operator_def, Workspace* ws)
-            : Operator<Context>(operator_def, ws) {}
 
     USE_OPERATOR_CONTEXT_FUNCTIONS;
 
+    static constexpr bool op_has_context_argument = std::is_same<CPUContext*, c10::guts::typelist::last_t<typename Schema::signature::parameter_types>>::value;
+    static constexpr bool op_has_state_argument = !std::is_same<void, State>::value;
+
+    C10OperatorWrapper(const OperatorDef& operator_def, Workspace* ws)
+            : Operator<Context>(operator_def, ws) {
+        state_ = details::init_state<State>();
+    }
+
+    static constexpr size_t num_inputs() {
+        return Schema::signature::num_args - 1 - (op_has_context_argument ? 1 : 0) - (op_has_state_argument ? 1 : 0);
+    }
+
     bool RunOnDevice() override {
-        RunOnDevice_(c10::guts::make_index_sequence<Schema::signature::num_args - 3>());
+        RunOnDevice_(c10::guts::make_index_sequence<num_inputs()>());
         return true;
     }
 
 private:
     template<size_t... InputIndex>
-    void RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
-        // TODO Handle context in a better way (and change the -3 in RunOnDevice() above back to -2)
-        c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0), &state_, &context_);
+    c10::guts::enable_if_t<details::true_t<InputIndex...>::value && op_has_context_argument && op_has_state_argument, void> RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
+        c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0), state_.get(), &context_);
     }
 
-    State state_;
-};
-
-template<class OpSchemaDef, class Context>
-class C10OperatorWrapper<OpSchemaDef, Context, void> final : public Operator<Context> {
-    using Schema = c10::OpSchema<OpSchemaDef>;
-public:
-    C10OperatorWrapper(const OperatorDef& operator_def, Workspace* ws)
-            : Operator<Context>(operator_def, ws) {}
-
-    USE_OPERATOR_CONTEXT_FUNCTIONS;
-
-    bool RunOnDevice() override {
-        RunOnDevice_(c10::guts::make_index_sequence<Schema::signature::num_args - 1>());
-        return true;
-    }
-
-private:
     template<size_t... InputIndex>
-    void RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
+    c10::guts::enable_if_t<details::true_t<InputIndex...>::value && op_has_context_argument && !op_has_state_argument, void> RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
+        c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0), &context_);
+    }
+
+    template<size_t... InputIndex>
+    c10::guts::enable_if_t<details::true_t<InputIndex...>::value && !op_has_context_argument && op_has_state_argument, void> RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
+        c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0), state_.get());
+    }
+
+    template<size_t... InputIndex>
+    c10::guts::enable_if_t<details::true_t<InputIndex...>::value && !op_has_context_argument && !op_has_state_argument, void> RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
         c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0));
     }
+
+    std::unique_ptr<State> state_;
 };
+
 
 CAFFE_DECLARE_REGISTRY(
     C10OperatorRegistry,
