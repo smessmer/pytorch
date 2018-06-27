@@ -15,8 +15,31 @@ namespace caffe2 {
  * TODO: Figure out a better way to handle output parameters
  */
 
-template<class OpSchemaDef, class Context>
+template<class OpSchemaDef, class Context, class State>
 class C10OperatorWrapper final : public Operator<Context> {
+    using Schema = c10::OpSchema<OpSchemaDef>;
+public:
+    C10OperatorWrapper(const OperatorDef& operator_def, Workspace* ws)
+            : Operator<Context>(operator_def, ws) {}
+
+    USE_OPERATOR_CONTEXT_FUNCTIONS;
+
+    bool RunOnDevice() override {
+        RunOnDevice_(c10::guts::make_index_sequence<Schema::signature::num_args - 2>());
+        return true;
+    }
+
+private:
+    template<size_t... InputIndex>
+    void RunOnDevice_(c10::guts::index_sequence<InputIndex...>) {
+        c10::Dispatcher<OpSchemaDef>::call(Input(InputIndex)..., Output(0), &state_);
+    }
+
+    State state_;
+};
+
+template<class OpSchemaDef, class Context>
+class C10OperatorWrapper<OpSchemaDef, Context, void> final : public Operator<Context> {
     using Schema = c10::OpSchema<OpSchemaDef>;
 public:
     C10OperatorWrapper(const OperatorDef& operator_def, Workspace* ws)
@@ -42,7 +65,7 @@ CAFFE_DECLARE_REGISTRY(
     const OperatorDef&,
     Workspace*);
 
-#define REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH(OpSchemaDef, Name)           \
-  CAFFE_REGISTER_CLASS(C10OperatorRegistry, Name, C10OperatorWrapper<OpSchemaDef, CPUContext>)
+#define REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH(OpSchemaDef, State, Name)           \
+  CAFFE_REGISTER_CLASS(C10OperatorRegistry, Name, C10OperatorWrapper<OpSchemaDef, CPUContext, State>)
 
 }
