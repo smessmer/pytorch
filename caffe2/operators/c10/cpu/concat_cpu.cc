@@ -11,7 +11,6 @@ using std::vector;
 namespace {
 template<class DataType>
 void concat_op_cpu_impl(c10::ArrayRef<const Tensor<CPUContext>*> inputs, Tensor<CPUContext>* output, Tensor<CPUContext>* split, int axis, int add_axis, CPUContext* context) {
-std::cerr << "---------------- INPUT SIZE: " << inputs.size() << std::endl;
     split->Resize(vector<TIndex>(1, inputs.size()));
     int* axis_data = split->template mutable_data<int>();
     int adj_size = inputs[0]->ndim() + (add_axis ? 1 : 0);

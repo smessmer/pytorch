@@ -10,19 +10,16 @@ using caffe2::CPUContext;
 
 namespace {
 template<class DataType>
-void fc_op_cpu_impl(Tensor<CPUContext> X, Tensor<CPUContext> W, Tensor<CPUContext> b, Tensor<CPUContext>* Y, caffe2::ops::FullyConnected::Cache* cache, CPUContext* context) {
+void fc_op_cpu_impl(Tensor<CPUContext> X, Tensor<CPUContext> W, Tensor<CPUContext> b, Tensor<CPUContext>* Y, int axis, int axis_w, caffe2::ops::FullyConnected::Cache* cache, CPUContext* context) {
 
-    // TODO these are supposed to be arguments, fixing them for now
-    constexpr size_t axis_ = 1;
-    constexpr size_t axis_w_ = 1;
-    constexpr bool TransposeWeight = true; // TODO This was a template argument, not a parameter
+    constexpr bool TransposeWeight = true;
 
     CAFFE_ENFORCE(b.ndim() == 1, b.ndim());
     // batch size
-    const auto canonical_axis = X.canonical_axis_index(axis_);
+    const auto canonical_axis = X.canonical_axis_index(axis);
     const auto M = X.size_to_dim(canonical_axis);
     const auto K = X.size_from_dim(canonical_axis);
-    const auto canonical_axis_w = W.canonical_axis_index(axis_w_);
+    const auto canonical_axis_w = W.canonical_axis_index(axis_w);
     const int N = TransposeWeight ? W.size_to_dim(canonical_axis_w)
                                   : W.size_from_dim(canonical_axis_w);
 
@@ -36,7 +33,7 @@ void fc_op_cpu_impl(Tensor<CPUContext> X, Tensor<CPUContext> W, Tensor<CPUContex
                 ", b: ",
                 b.dims(),
                 ", axis: ",
-                axis_,
+                axis,
                 ", M: ",
                 M,
                 ", N: ",
