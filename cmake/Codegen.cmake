@@ -20,7 +20,7 @@ install(FILES ${CMAKE_BINARY_DIR}/caffe2/core/macros.h
 # ---[ ATen specific
 # SET_SOURCE_FILES_PROPERTIES must be in the same CMakeLists.txt file as the target that includes the file
 # so we need to set these commands here rather than in src/TH
-if (NOT ANDROID AND NOT IOS)
+if (NOT ANDROID AND NOT IOS AND NOT ROCM)
   IF(C_SSE4_1_FOUND AND C_SSE4_2_FOUND)
     IF(MSVC)
       SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_LIST_DIR}/../aten/src/TH/generic/simd/convolve5x5_sse.cpp PROPERTIES COMPILE_FLAGS "${MSVC_OPT_FLAG}/fp:fast")

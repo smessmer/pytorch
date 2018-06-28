@@ -4,47 +4,49 @@ include(../cmake/Codegen.cmake)
 # ---[ Declare source file lists
 
 # ---[ ATen build
-set(__caffe2_CMAKE_POSITION_INDEPENDENT_CODE ${CMAKE_POSITION_INDEPENDENT_CODE})
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(AT_LINK_STYLE INTERFACE)
-add_subdirectory(../aten aten)
-set(CMAKE_POSITION_INDEPENDENT_CODE ${__caffe2_CMAKE_POSITION_INDEPENDENT_CODE})
-
-# Generate the headers wrapped by our operator
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/contrib/aten/aten_op.h
-COMMAND
-${PYCMD} ${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten/gen_op.py
-  --aten_root=${CMAKE_CURRENT_SOURCE_DIR}/../aten
-  --template_dir=${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten
-  --yaml_dir=${CMAKE_CURRENT_BINARY_DIR}/../aten/src/ATen
-  --install_dir=${CMAKE_CURRENT_BINARY_DIR}/contrib/aten
-DEPENDS
-ATEN_CPU_FILES_GEN_TARGET
-${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten/gen_op.py
-${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten/aten_op_template.h)
-
-add_custom_target(__aten_op_header_gen
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/contrib/aten/aten_op.h)
-add_library(aten_op_header_gen INTERFACE)
-add_dependencies(aten_op_header_gen __aten_op_header_gen)
-
-# Add source, includes, and libs to lists
-list(APPEND Caffe2_CPU_SRCS ${ATen_CPU_SRCS})
-list(APPEND Caffe2_GPU_SRCS ${ATen_CUDA_SRCS})
-# ATen tests use catch instead of gtest so keep separate for now
-# list(APPEND Caffe2_CPU_TEST_SRCS ${ATen_CPU_TEST_SRCS})
-# list(APPEND Caffe2_GPU_TEST_SRCS ${ATen_CUDA_TEST_SRCS})
-list(APPEND Caffe2_CPU_INCLUDE ${ATen_CPU_INCLUDE})
-list(APPEND Caffe2_GPU_INCLUDE ${ATen_CUDA_INCLUDE})
-list(APPEND Caffe2_DEPENDENCY_LIBS ${ATen_CPU_DEPENDENCY_LIBS})
-list(APPEND Caffe2_CUDA_DEPENDENCY_LIBS ${ATen_CUDA_DEPENDENCY_LIBS})
-list(APPEND Caffe2_DEPENDENCY_INCLUDE ${ATen_THIRD_PARTY_INCLUDE})
-
-IF(USE_ROCM)
-  # Set the HIP Variables
-  set(Caffe2_HIP_SRCS ${ATen_CUDA_SRCS})
-  set(Caffe2_HIP_INCLUDES ${Caffe2_HIP_INCLUDES} ${Caffe2_GPU_INCLUDE})
-ENDIF(USE_ROCM)
+if (NOT USE_ROCM)
+  set(__caffe2_CMAKE_POSITION_INDEPENDENT_CODE ${CMAKE_POSITION_INDEPENDENT_CODE})
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  set(AT_LINK_STYLE INTERFACE)
+  add_subdirectory(../aten aten)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ${__caffe2_CMAKE_POSITION_INDEPENDENT_CODE})
+  
+  # Generate the headers wrapped by our operator
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/contrib/aten/aten_op.h
+  COMMAND
+  ${PYCMD} ${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten/gen_op.py
+    --aten_root=${CMAKE_CURRENT_SOURCE_DIR}/../aten
+    --template_dir=${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten
+    --yaml_dir=${CMAKE_CURRENT_BINARY_DIR}/../aten/src/ATen
+    --install_dir=${CMAKE_CURRENT_BINARY_DIR}/contrib/aten
+  DEPENDS
+  ATEN_CPU_FILES_GEN_TARGET
+  ${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten/gen_op.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/contrib/aten/aten_op_template.h)
+  
+  add_custom_target(__aten_op_header_gen
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/contrib/aten/aten_op.h)
+  add_library(aten_op_header_gen INTERFACE)
+  add_dependencies(aten_op_header_gen __aten_op_header_gen)
+  
+  # Add source, includes, and libs to lists
+  list(APPEND Caffe2_CPU_SRCS ${ATen_CPU_SRCS})
+  list(APPEND Caffe2_GPU_SRCS ${ATen_CUDA_SRCS})
+  # ATen tests use catch instead of gtest so keep separate for now
+  # list(APPEND Caffe2_CPU_TEST_SRCS ${ATen_CPU_TEST_SRCS})
+  # list(APPEND Caffe2_GPU_TEST_SRCS ${ATen_CUDA_TEST_SRCS})
+  list(APPEND Caffe2_CPU_INCLUDE ${ATen_CPU_INCLUDE})
+  list(APPEND Caffe2_GPU_INCLUDE ${ATen_CUDA_INCLUDE})
+  list(APPEND Caffe2_DEPENDENCY_LIBS ${ATen_CPU_DEPENDENCY_LIBS})
+  list(APPEND Caffe2_CUDA_DEPENDENCY_LIBS ${ATen_CUDA_DEPENDENCY_LIBS})
+  list(APPEND Caffe2_DEPENDENCY_INCLUDE ${ATen_THIRD_PARTY_INCLUDE})
+  
+  IF(USE_ROCM)
+    # Set the HIP Variables
+    set(Caffe2_HIP_SRCS ${ATen_CUDA_SRCS})
+    set(Caffe2_HIP_INCLUDES ${Caffe2_HIP_INCLUDES} ${Caffe2_GPU_INCLUDE})
+  ENDIF(USE_ROCM)
+endif()
 
 # Note: the folders that are being commented out have not been properly
 # addressed yet.
@@ -241,7 +243,6 @@ endif()
 # ---[ Caffe2 HIP sources.
 if(USE_ROCM)
   # Call again since Caffe2_HIP_INCLUDES is extended with ATen include dirs.
-  HIP_INCLUDE_DIRECTORIES(${Caffe2_HIP_INCLUDES})
   set_source_files_properties(${Caffe2_HIP_SRCS} PROPERTIES HIP_SOURCE_PROPERTY_FORMAT 1)
   hip_add_library(caffe2_hip ${Caffe2_HIP_SRCS})
 
@@ -253,9 +254,6 @@ if(USE_ROCM)
   # Since PyTorch files contain HIP headers, this is also needed to capture the includes.
   target_include_directories(caffe2_hip PRIVATE ${Caffe2_HIP_INCLUDES})
   target_include_directories(caffe2_hip INTERFACE $<INSTALL_INTERFACE:include>)
-
-  # Set standard properties on the target
-  aten_set_target_props(caffe2_hip)
 
   # When a library has object files that contain device code, it needs to use hipcc/hcc to link.
   set_target_properties(caffe2_hip PROPERTIES LINKER_LANGUAGE HIP)
@@ -322,17 +320,19 @@ endif()
 
 set(__aten_test_dir "test/aten")
 
-foreach(test_src ${ATen_CPU_TEST_SRCS})
-  get_filename_component(test_name ${test_src} NAME_WE)
-  add_executable(${test_name} "${test_src}")
-  target_include_directories(${test_name} PRIVATE ${Caffe2_CPU_INCLUDE})
-  target_include_directories(${test_name} SYSTEM PRIVATE ${Caffe2_DEPENDENCY_INCLUDE})
-  target_link_libraries(${test_name} ${Caffe2_MAIN_LIBS})
-  add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)
-  install(TARGETS ${test_name} DESTINATION ${__aten_test_dir})
-endforeach()
+if (NOT USE_ROCM)
+  foreach(test_src ${ATen_CPU_TEST_SRCS})
+    get_filename_component(test_name ${test_src} NAME_WE)
+    add_executable(${test_name} "${test_src}")
+    target_include_directories(${test_name} PRIVATE ${Caffe2_CPU_INCLUDE})
+    target_include_directories(${test_name} SYSTEM PRIVATE ${Caffe2_DEPENDENCY_INCLUDE})
+    target_link_libraries(${test_name} ${Caffe2_MAIN_LIBS})
+    add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)
+    install(TARGETS ${test_name} DESTINATION ${__aten_test_dir})
+  endforeach()
+endif()
 
-if(USE_CUDA OR USE_ROCM)
+if(USE_CUDA)
   foreach(test_src ${ATen_CUDA_TEST_SRCS})
     get_filename_component(test_name ${test_src} NAME_WE)
     torch_cuda_based_add_executable(${test_name} "${test_src}")

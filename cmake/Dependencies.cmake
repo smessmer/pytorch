@@ -37,7 +37,7 @@ else()
 endif()
 
 # ---[ BLAS
-if (NOT ANDROID AND NOT IOS)
+if (NOT ANDROID AND NOT IOS AND NOT ROCM)
   set(BLAS "MKL" CACHE STRING "Selected BLAS library")
 else()
   set(BLAS "Eigen" CACHE STRING "Selected BLAS library")
@@ -473,7 +473,7 @@ if(PYTORCH_FOUND_HIP)
   # This is needed for library added by hip_add_library (same for hip_add_executable)
   hip_include_directories(${Caffe2_HIP_INCLUDES})
 
-  if(NOT ANDROID AND NOT IOS)
+  if(NOT ANDROID AND NOT IOS AND NOT ROCM)
     set(Caffe2_HIP_DEPENDENCY_LIBS
       ${rocrand_LIBRARIES} ${hiprand_LIBRARIES} ${PYTORCH_HIP_HCC_LIBRARIES} ${PYTORCH_MIOPEN_LIBRARIES} ${hipblas_LIBRARIES}
       ${hipsparse_LIBRARIES} ${hiprng_LIBRARIES})
@@ -679,7 +679,7 @@ if (USE_NNAPI AND NOT ANDROID)
   caffe2_update_option(USE_NNAPI OFF)
 endif()
 
-if (NOT ANDROID AND NOT IOS)
+if (NOT ANDROID AND NOT IOS AND NOT ROCM)
   if (CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
     list(APPEND Caffe2_DEPENDENCY_LIBS aten_op_header_gen)
     if (USE_CUDA)
@@ -742,7 +742,7 @@ if (CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO)
 endif()
 
 # --[ ATen checks
-if (NOT ANDROID AND NOT IOS)
+if (NOT ANDROID AND NOT IOS AND NOT ROCM)
   set(TORCH_CUDA_ARCH_LIST $ENV{TORCH_CUDA_ARCH_LIST})
   set(TORCH_NVCC_FLAGS $ENV{TORCH_NVCC_FLAGS})
 
