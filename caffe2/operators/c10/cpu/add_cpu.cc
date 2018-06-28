@@ -9,18 +9,14 @@ using caffe2::CPUContext;
 namespace {
 
 template<class DataType>
-void add_op_cpu_impl(Tensor<CPUContext> A, Tensor<CPUContext> B, Tensor<CPUContext> *C, CPUContext* context) {
-
-    // TODO These are supposed to be arguments
-    constexpr bool legacy_broadcast_ = true;
-    constexpr int axis_ = -1;
+void add_op_cpu_impl(Tensor<CPUContext> A, Tensor<CPUContext> B, Tensor<CPUContext> *C, bool legacy_broadcast, int axis, CPUContext* context) {
 
     const DataType* A_data = A.template data<DataType>();
     const DataType* B_data = B.template data<DataType>();
     std::vector<int> A_dims;
     std::vector<int> B_dims;
 
-    if (legacy_broadcast_) {
+    if (legacy_broadcast) {
         CAFFE_ENFORCE_NE(
                 C,
                 &B,
@@ -33,7 +29,7 @@ void add_op_cpu_impl(Tensor<CPUContext> A, Tensor<CPUContext> B, Tensor<CPUConte
         } else {
             size_t pre, n, post;
             std::tie(pre, n, post) =
-                    caffe2::elementwise_ops_utils::ComputeLegacyBroadcastSizes(A, B, axis_);
+                    caffe2::elementwise_ops_utils::ComputeLegacyBroadcastSizes(A, B, axis);
             A_dims = {
                     static_cast<int>(pre), static_cast<int>(n), static_cast<int>(post)};
             B_dims = {static_cast<int>(n), 1};
