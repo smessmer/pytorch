@@ -117,9 +117,8 @@ fi
 if [[ -n $CONDA_INSTALL_LOCALLY ]]; then
   install_locally=1
 fi
-if [[ -n $INTEGRATED ]]; then
-  integrated=1
-fi
+
+integrated=1
 
 # Parameters passed in by command line. These override those set by environment
 # variables
@@ -157,9 +156,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --full)
       build_full=1
-      ;;
-    --integrated)
-      integrated=1
       ;;
     --slim)
       slim=1
