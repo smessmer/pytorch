@@ -1,4 +1,5 @@
 #include "caffe2/operators/distance_op.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

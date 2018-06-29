@@ -1,6 +1,7 @@
 #include "caffe2/sgd/lars_op.h"
 #include <math.h>
 #include "caffe2/utils/math.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

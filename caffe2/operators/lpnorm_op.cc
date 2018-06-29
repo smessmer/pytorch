@@ -2,6 +2,7 @@
 
 #include "caffe2/core/operator.h"
 #include "caffe2/core/types.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

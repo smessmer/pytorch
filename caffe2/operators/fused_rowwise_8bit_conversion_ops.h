@@ -6,6 +6,7 @@
 #include "caffe2/core/operator.h"
 #include "caffe2/operators/reducer_functors.h"
 #include "caffe2/utils/math.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

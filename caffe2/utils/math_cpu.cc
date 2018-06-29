@@ -12,6 +12,7 @@
 //     where BLAS may not be present.
 
 #include "caffe2/utils/math.h"
+#include "caffe2/utils/math_eigen.h"
 
 #include <algorithm>
 #include <array>

@@ -1,4 +1,5 @@
 #include "caffe2/operators/elementwise_div_op.h"
+#include "caffe2/utils/math_eigen.h"
 
 #include <algorithm>
 #include <functional>

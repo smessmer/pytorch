@@ -1,6 +1,7 @@
 // TODO(ataei): reduce the apparent redundancy of all the code below.
 #include "caffe2/operators/pool_op.h"
 #include "caffe2/utils/cpu_neon.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

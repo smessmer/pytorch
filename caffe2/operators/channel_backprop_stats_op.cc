@@ -1,4 +1,5 @@
 #include "caffe2/operators/channel_backprop_stats_op.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

@@ -8,6 +8,7 @@
 
 #include "caffe2/core/operator.h"
 
+#include "caffe2/utils/math_eigen.h"
 #include "Eigen/Core"
 
 namespace caffe2 {

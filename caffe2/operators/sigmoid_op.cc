@@ -1,5 +1,7 @@
 #include "caffe2/operators/sigmoid_op.h"
 
+#include "caffe2/utils/math_eigen.h"
+
 namespace caffe2 {
 
 template <>

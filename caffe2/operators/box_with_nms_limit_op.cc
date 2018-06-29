@@ -1,6 +1,7 @@
 #include "box_with_nms_limit_op.h"
 #include "caffe2/utils/eigen_utils.h"
 #include "generate_proposals_op_util_nms.h"
+#include "caffe2/utils/math_eigen.h"
 
 #ifdef CAFFE2_USE_MKL
 #include "caffe2/mkl/operators/operator_fallback_mkl.h"

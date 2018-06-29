@@ -1,6 +1,7 @@
 #include "caffe2/operators/softplus_op.h"
 
 #include "caffe2/utils/math.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

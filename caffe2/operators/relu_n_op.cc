@@ -17,6 +17,7 @@
 #include "caffe2/operators/relu_n_op.h"
 
 #include "caffe2/utils/math.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

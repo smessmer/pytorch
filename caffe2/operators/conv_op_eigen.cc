@@ -1,4 +1,5 @@
 #include "Eigen/Core"
+#include "caffe2/utils/math_eigen.h"
 
 #if EIGEN_VERSION_AT_LEAST(3, 3, 0)
 

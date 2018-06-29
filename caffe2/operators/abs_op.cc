@@ -1,4 +1,5 @@
 #include "caffe2/operators/abs_op.h"
+#include "caffe2/utils/math_eigen.h"
 
 #include <algorithm>
 #include <functional>

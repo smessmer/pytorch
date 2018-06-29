@@ -1,4 +1,5 @@
 #include "caffe2/operators/cross_entropy_op.h"
+#include "caffe2/utils/math_eigen.h"
 
 namespace caffe2 {
 

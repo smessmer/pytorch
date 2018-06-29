@@ -1,5 +1,6 @@
 #include "caffe2/operators/prelu_op.h"
 #include "caffe2/utils/math.h"
+#include "caffe2/utils/math_eigen.h"
 
 #include "caffe2/core/types.h"
 #include "caffe2/utils/cpu_neon.h"
