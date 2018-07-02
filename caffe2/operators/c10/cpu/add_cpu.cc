@@ -9,7 +9,7 @@ using caffe2::CPUContext;
 namespace {
 
 template<class DataType>
-void add_op_cpu_impl(Tensor<CPUContext> A, Tensor<CPUContext> B, Tensor<CPUContext> *C, bool legacy_broadcast, int axis, CPUContext* context) {
+void add_op_cpu_impl(const Tensor<CPUContext>& A, const Tensor<CPUContext>& B, Tensor<CPUContext> *C, bool legacy_broadcast, int axis, CPUContext* context) {
 
     const DataType* A_data = A.template data<DataType>();
     const DataType* B_data = B.template data<DataType>();

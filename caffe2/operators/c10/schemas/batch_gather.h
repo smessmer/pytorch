@@ -9,7 +9,7 @@ namespace ops {
 struct BatchGather final {
     static constexpr const char* name = "batch_gather";
 
-    using Signature = void(Tensor<CPUContext> data, Tensor<CPUContext> indices, Tensor<CPUContext>* output, CPUContext* context);
+    using Signature = void(const Tensor<CPUContext>& data, const Tensor<CPUContext>& indices, Tensor<CPUContext>* output, CPUContext* context);
 
     static constexpr c10::guts::array<const char*, 4> parameter_names = {{"data", "indices", "output", "context"}};
 };

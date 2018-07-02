@@ -9,7 +9,7 @@ namespace ops {
 struct Flatten final {
     static constexpr const char* name = "flatten";
 
-    using Signature = void(Tensor<CPUContext> input, Tensor<CPUContext>* output, int axis, CPUContext* context);
+    using Signature = void(const Tensor<CPUContext>& input, Tensor<CPUContext>* output, int axis, CPUContext* context);
 
     static constexpr c10::guts::array<const char*, 4> parameter_names = {{"input", "output", "axis", "context"}};
 };

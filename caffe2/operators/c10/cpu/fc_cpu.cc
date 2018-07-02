@@ -10,7 +10,7 @@ using caffe2::CPUContext;
 
 namespace {
 template<class DataType>
-void fc_op_cpu_impl(Tensor<CPUContext> X, Tensor<CPUContext> W, Tensor<CPUContext> b, Tensor<CPUContext>* Y, int axis, int axis_w, caffe2::ops::FullyConnected::Cache* cache, CPUContext* context) {
+void fc_op_cpu_impl(const Tensor<CPUContext>& X, const Tensor<CPUContext>& W, const Tensor<CPUContext>& b, Tensor<CPUContext>* Y, int axis, int axis_w, caffe2::ops::FullyConnected::Cache* cache, CPUContext* context) {
 
     constexpr bool TransposeWeight = true;
 

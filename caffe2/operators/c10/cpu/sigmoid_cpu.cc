@@ -7,7 +7,7 @@ using caffe2::CPUContext;
 
 namespace {
 template<class DataType>
-void sigmoid_op_cpu_impl(Tensor<CPUContext> input, Tensor<CPUContext> *output) {
+void sigmoid_op_cpu_impl(const Tensor<CPUContext>& input, Tensor<CPUContext> *output) {
     output->ResizeLike(input);
 
     caffe2::ConstEigenVectorArrayMap<DataType> xM(input.data<DataType>(), input.size());

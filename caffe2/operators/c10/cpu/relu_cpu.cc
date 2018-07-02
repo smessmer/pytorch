@@ -7,7 +7,7 @@ using caffe2::CPUContext;
 
 namespace {
 template<class DataType>
-void relu_op_cpu_impl(Tensor<CPUContext> input, Tensor<CPUContext> *output) {
+void relu_op_cpu_impl(const Tensor<CPUContext>& input, Tensor<CPUContext> *output) {
     output->ResizeLike(input);
 
 #ifdef CAFFE2_USE_ACCELERATE

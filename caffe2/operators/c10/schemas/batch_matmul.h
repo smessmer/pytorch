@@ -13,7 +13,7 @@ struct BatchMatmul final {
 
     static constexpr const char* name = "batch_matmul";
 
-    using Signature = void(Tensor<CPUContext> A, Tensor<CPUContext> B, Tensor<CPUContext>* output, int trans_a, int trans_b, int broadcast, int use_scratch, State* state, CPUContext* context);
+    using Signature = void(const Tensor<CPUContext>& A, const Tensor<CPUContext>& B, Tensor<CPUContext>* output, int trans_a, int trans_b, int broadcast, int use_scratch, State* state, CPUContext* context);
 
     static constexpr c10::guts::array<const char*, 9> parameter_names = {{"A", "B", "output", "trans_a", "trans_b", "broadcast", "use_scratch", "state", "context"}};
 };

@@ -9,7 +9,7 @@ namespace ops {
 struct Relu final {
     static constexpr const char* name = "relu";
 
-    using Signature = void(Tensor<CPUContext> input, Tensor<CPUContext>* output);
+    using Signature = void(const Tensor<CPUContext>& input, Tensor<CPUContext>* output);
 
     static constexpr c10::guts::array<const char*, 2> parameter_names = {{"input", "output"}};
 };

@@ -11,7 +11,7 @@ namespace math = caffe2::math;
 namespace {
 
 template<class T>
-void batch_matmul_op_cpu_impl(Tensor<CPUContext> A, Tensor<CPUContext> B, Tensor<CPUContext>* Y, int trans_a, int trans_b, int broadcast, int use_scratch, caffe2::ops::BatchMatmul::State* state, CPUContext* context) {
+void batch_matmul_op_cpu_impl(const Tensor<CPUContext>& A, const Tensor<CPUContext>& B, Tensor<CPUContext>* Y, int trans_a, int trans_b, int broadcast, int use_scratch, caffe2::ops::BatchMatmul::State* state, CPUContext* context) {
 
     using Engine = caffe2::DefaultEngine;
 

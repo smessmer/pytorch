@@ -10,7 +10,7 @@ using caffe2::TIndex;
 namespace {
 
 template<class TInd>
-void batch_gather_op_cpu_impl(Tensor<CPUContext> data, Tensor<CPUContext> indices, Tensor<CPUContext>* output, CPUContext* context) {
+void batch_gather_op_cpu_impl(const Tensor<CPUContext>& data, const Tensor<CPUContext>& indices, Tensor<CPUContext>* output, CPUContext* context) {
 
     CAFFE_ENFORCE_GE(data.ndim(), 2, "DATA should be at least 2-D");
 

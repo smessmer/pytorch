@@ -14,7 +14,7 @@ struct FullyConnected final {
         Tensor<CPUContext> bias_multiplier_;
     };
     
-    using Signature = void(Tensor<CPUContext> X, Tensor<CPUContext> W, Tensor<CPUContext> b, Tensor<CPUContext>* output, int axis, int axis_w, Cache* cache, CPUContext* context);
+    using Signature = void(const Tensor<CPUContext>& X, const Tensor<CPUContext>& W, const Tensor<CPUContext>& b, Tensor<CPUContext>* output, int axis, int axis_w, Cache* cache, CPUContext* context);
 
     static constexpr c10::guts::array<const char*, 8> parameter_names = {{"X", "W", "b", "output", "axis", "axis_w", "cache", "context"}};
 };

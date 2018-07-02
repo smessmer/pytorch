@@ -7,7 +7,7 @@ using caffe2::CPUContext;
 
 namespace {
 template<class DataType>
-void flatten_op_cpu_impl(Tensor<CPUContext> input, Tensor<CPUContext> *output, int axis, CPUContext* context) {
+void flatten_op_cpu_impl(const Tensor<CPUContext>& input, Tensor<CPUContext> *output, int axis, CPUContext* context) {
     CAFFE_ENFORCE_GE(
             input.dims().size(), axis, "The rank of the tensor must be >= axis.");
     output->Resize(input.size_to_dim(axis), input.size_from_dim(axis));

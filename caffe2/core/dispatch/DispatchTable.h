@@ -39,6 +39,7 @@ public:
       auto result = map_.emplace(std::forward<Key>(key), value);
       if (!result.second) {
         std::ostringstream msg;
+        using ::operator<<;
         msg << "Tried to register conflicting kernels to the dispatcher: " << key;
         throw std::logic_error(msg.str());
       }

@@ -11,7 +11,7 @@ using caffe2::TIndex;
 namespace {
 
 template <typename InputType, typename IndexType>
-void sparse_lengths_sum_op_cpu_impl(Tensor<CPUContext> dataInput, Tensor<CPUContext> indicesInput, Tensor<CPUContext> lengthsInput, Tensor<CPUContext>* output) {
+void sparse_lengths_sum_op_cpu_impl(const Tensor<CPUContext>& dataInput, const Tensor<CPUContext>& indicesInput, const Tensor<CPUContext>& lengthsInput, Tensor<CPUContext>* output) {
 
     using T = float;
     constexpr bool USE_MEAN = false;
