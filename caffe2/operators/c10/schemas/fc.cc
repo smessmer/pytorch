@@ -21,5 +21,5 @@ namespace {
 }
 
 namespace caffe2 {
-    REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_PARAMETERS(ops::FullyConnected, ops::FullyConnected::Cache, C10FC_DontUseThisOpYet, AxisParameter, AxisWParameter)
+    REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_PARAMETERS(ops::FullyConnected, ops::FullyConnected::Cache, C10FC_DontUseThisOpYet, ParameterHelper<AxisParameter>, ParameterHelper<AxisWParameter>)
 }

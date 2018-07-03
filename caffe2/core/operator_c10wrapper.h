@@ -16,7 +16,7 @@ template<> inline std::unique_ptr<void> init_state<void>() {
     return std::unique_ptr<void>();
 }
 template<class T> using is_output_arg = std::is_same<Tensor<CPUContext>*, T>;
-template<class ParameterDef> using extract_type_t = typename ParameterDef::type;
+template<class ParameterDef> using extract_type_t = c10::guts::result_of_t<decltype(&ParameterDef::parse)(ArgumentHelper)>;
 }
 
 /**
@@ -44,7 +44,7 @@ public:
     C10OperatorWrapper(const OperatorDef& operator_def, Workspace* ws)
             : Operator<Context>(operator_def, ws),
               state_(details::init_state<State>()),
-              parameters_(parse_parameters_(c10::guts::make_index_sequence<num_parameters()>())){
+              parameters_(parse_parameters_(operator_def, c10::guts::make_index_sequence<num_parameters()>())){
     }
 
     static constexpr size_t num_inputs() {
@@ -66,14 +66,14 @@ public:
 
 private:
     template<size_t... ParameterIndex>
-    ParameterTuple parse_parameters_(c10::guts::index_sequence<ParameterIndex...>) {
-        return ParameterTuple{Parameter<ParameterIndex>()...};
+    ParameterTuple parse_parameters_(const OperatorDef& operator_def, c10::guts::index_sequence<ParameterIndex...>) {
+        return ParameterTuple{Parameter<ParameterIndex>(operator_def)...};
     }
 
     template<size_t Index>
-    typename std::tuple_element<Index, ParameterDefTuple>::type::type Parameter() {
+    details::extract_type_t<typename std::tuple_element<Index, ParameterDefTuple>::type> Parameter(const OperatorDef& operator_def) {
         using Parameter = typename std::tuple_element<Index, ParameterDefTuple>::type;
-        return OperatorBase::GetSingleArgument<typename Parameter::type>(Parameter::name(), Parameter::default_value());
+        return Parameter::parse(ArgumentHelper(operator_def));
     }
 
     template<size_t... InputIndex, size_t... OutputIndex, size_t... ParameterIndex>
@@ -128,6 +128,13 @@ private:
     std::unique_ptr<State> state_;
 
     ParameterTuple parameters_;
+};
+
+template<class ParameterDef>
+struct ParameterHelper final {
+    static typename ParameterDef::type parse(const ArgumentHelper& helper) {
+        return helper.GetSingleArgument<typename ParameterDef::type>(ParameterDef::name(), ParameterDef::default_value());
+    }
 };
 
 

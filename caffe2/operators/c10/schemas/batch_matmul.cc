@@ -31,5 +31,5 @@ struct UseScratchParameter final {
 }
 
 namespace caffe2 {
-    REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_PARAMETERS(ops::BatchMatmul, ops::BatchMatmul::State, C10BatchMatMul_DontUseThisOpYet, TransAParameter, TransBParameter, BroadcastParameter, UseScratchParameter)
+    REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_PARAMETERS(ops::BatchMatmul, ops::BatchMatmul::State, C10BatchMatMul_DontUseThisOpYet, ParameterHelper<TransAParameter>, ParameterHelper<TransBParameter>, ParameterHelper<BroadcastParameter>, ParameterHelper<UseScratchParameter>)
 }
