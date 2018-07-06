@@ -110,7 +110,7 @@ private:
 
 namespace caffe2 {
     REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_ARRAY_INPUT_AND_PARAMETERS(ops::ConstantFill, void, C10ConstantFill_DontUseThisOpYet, ShapeParameter, ExtraShapeParameter, InputAsShapeParameter, DTypeParameter, ValueParameter)
-    REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_ARRAY_INPUT_AND_PARAMETERS(ops::UniformFill, void, C10ConstantFill_DontUseThisOpYet, ShapeParameter, ExtraShapeParameter, InputAsShapeParameter, MinParameter, MaxParameter)
+    REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_ARRAY_INPUT_AND_PARAMETERS(ops::UniformFill, void, C10UniformFill_DontUseThisOpYet, ShapeParameter, ExtraShapeParameter, InputAsShapeParameter, MinParameter, MaxParameter)
 
     REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_ARRAY_INPUT_AND_PARAMETERS(ops::GivenTensorFill<float>, void, C10GivenTensorFill_DontUseThisOpYet, ShapeParameter, ExtraShapeParameter, InputAsShapeParameter, ValuesParameter<float>)
     REGISTER_C10_OPERATOR_FOR_CAFFE2_DISPATCH_WITH_ARRAY_INPUT_AND_PARAMETERS(ops::GivenTensorFill<int>, void, C10GivenTensorIntFill_DontUseThisOpYet, ShapeParameter, ExtraShapeParameter, InputAsShapeParameter, ValuesParameter<int>)
