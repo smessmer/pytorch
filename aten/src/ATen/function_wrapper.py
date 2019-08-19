@@ -156,11 +156,11 @@ inline ${return_type} Tensor::${api_name}(${method_formals}) const {
 #ifdef USE_STATIC_DISPATCH
     ${mobile_method_body}
 #else
-    static c10::OperatorHandle op = c10::Dispatcher::singleton().findSchema({"aten::${name}", "${overload_name}"}).value();
+    static const c10::impl::OperatorEntry& op = c10::Dispatcher::singleton().findSchema({"aten::${name}", "${overload_name}"}).value().getEntry();
     if (is_variable()) {
-        return c10::Dispatcher::singleton().callUnboxedAutogradKernel<${formals_types_with_return}>(op, ${method_actuals});
+        return op.callUnboxedAutogradKernel<${formals_types_with_return}>(${method_actuals});
     } else {
-        return c10::Dispatcher::singleton().lookup(op, type_id()).callUnboxed<${formals_types_with_return}>(${method_actuals});
+        return op.lookupKernel(type_id()).callUnboxed<${formals_types_with_return}>(${method_actuals});
     }
 #endif
 }
@@ -190,11 +190,11 @@ static inline ${return_type} ${api_name}(${formals}) {
 #ifdef USE_STATIC_DISPATCH
     ${mobile_function_body}
 #else
-    static c10::OperatorHandle op = c10::Dispatcher::singleton().findSchema({"aten::${name}", "${overload_name}"}).value();
+    static const c10::impl::OperatorEntry& op = c10::Dispatcher::singleton().findSchema({"aten::${name}", "${overload_name}"}).value().getEntry();
     if (${inferred_is_variable}) {
-        return c10::Dispatcher::singleton().callUnboxedAutogradKernel<${formals_types_with_return}>(op ${native_actuals_with_comma_prefix});
+        return op.callUnboxedAutogradKernel<${formals_types_with_return}>(${native_actuals});
     } else {
-        return c10::Dispatcher::singleton().lookup(op, backendToTensorTypeId(${inferred_backend})).callUnboxed<${formals_types_with_return}>(${native_actuals});
+        return op.lookupKernel(backendToTensorTypeId(${inferred_backend})).callUnboxed<${formals_types_with_return}>(${native_actuals});
     }
 #endif
 }

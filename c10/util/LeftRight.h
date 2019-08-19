@@ -65,13 +65,13 @@ public:
 
     template <typename F>
     auto read(F&& readFunc) const -> typename std::result_of<F(const T&)>::type {
-        detail::IncrementRAII _increment_counter(&_counters[_foregroundCounterIndex.load()]);
+        //detail::IncrementRAII _increment_counter(&_counters[_foregroundCounterIndex.load()]);
 
-        if(C10_UNLIKELY(_inDestruction.load())) {
-            throw std::logic_error("Issued LeftRight::read() after the destructor started running");
-        }
+        //if(C10_UNLIKELY(_inDestruction.load())) {
+        //    throw std::logic_error("Issued LeftRight::read() after the destructor started running");
+        //}
 
-        return readFunc(_data[_foregroundDataIndex.load()]);
+        return readFunc(_data[0]);
     }
 
     // Throwing an exception in writeFunc is ok but causes the state to be either the old or the new state,

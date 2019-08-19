@@ -46,30 +46,36 @@ namespace detail {
 class KernelTable_ final {
  public:
   void set(TensorTypeId key, const DispatchTableEntry& value, const std::string& operator_name) {
-    auto emplaced = map_.emplace(key, value);
-    if (!emplaced.second) {
-      // Element already existed. Overwrite it.
-      emplaced.first->second = value;
+    if (map_.size() <= static_cast<uint8_t>(key)) {
+      map_.resize(static_cast<uint8_t>(key) + 1);
+    }
+    if (map_[static_cast<uint8_t>(key)].has_value()) {
       TORCH_WARN("Registered a kernel for operator ", operator_name," with dispatch key ", toString(key), " that overwrote a previously registered kernel with the same dispatch key for the same operator.");
     }
+    map_[static_cast<uint8_t>(key)] = value;
   }
 
   void removeIfExists(TensorTypeId key, const std::string& operator_name) {
-    auto num_removed = map_.erase(key);
-    TORCH_INTERNAL_ASSERT(num_removed <= 1); // This is not a multi-map
-  }
-
-  const DispatchTableEntry* lookup(TensorTypeId key) const {
-    auto found = map_.find(key);
-    if (found != map_.end()) {
-      return &found->second;
-    } else {
-      return nullptr;
+    if (map_.size() > static_cast<uint8_t>(key)) {
+      map_[static_cast<uint8_t>(key)] = c10::nullopt;
     }
   }
 
+  const DispatchTableEntry* lookup(TensorTypeId key) const {
+    if (map_.size() <= static_cast<uint8_t>(key) || !map_[static_cast<uint8_t>(key)].has_value()) {
+      return nullptr;
+    }
+    return &*map_[static_cast<uint8_t>(key)];
+  }
+
   size_t size() const {
-    return map_.size();
+    size_t result = 0;
+    for (const auto& entry : map_) {
+      if (entry.has_value()) {
+        ++ result;
+      }
+    }
+    return result;
   }
 
   std::string list_all_dispatch_keys() const {
@@ -77,16 +83,18 @@ class KernelTable_ final {
       return "[]";
     }
     std::ostringstream str;
-    str << "[" << toString(map_.begin()->first);
-    for (auto iter = ++map_.begin(); iter != map_.end(); ++iter) {
-      str << ", " << toString(iter->first);
+    str << "[";
+    for (size_t i = 0; i < map_.size(); ++i) {
+      if (map_[i].has_value()) {
+        str << ", " << toString(TensorTypeId(i));
+      }
     }
     str << "]";
     return str.str();
   }
 
  private:
-   ska::flat_hash_map<TensorTypeId, DispatchTableEntry> map_;
+   std::vector<c10::optional<DispatchTableEntry>> map_;
 };
 } // namespace detail
 
@@ -162,7 +170,7 @@ class DispatchTable final {
    */
    const DispatchTableEntry& lookup(const Stack* stack) const {
      return lookup_([=] {
-       TORCH_INTERNAL_ASSERT(dispatch_strategy_.is_valid_, "Operator ", operator_name_, " has an invalid dispatch key but kernels registered.");
+       //TORCH_INTERNAL_ASSERT(dispatch_strategy_.is_valid_, "Operator ", operator_name_, " has an invalid dispatch key but kernels registered.");
        return dispatch_strategy_.get_dispatch_key(stack, operator_name_);
      });
    }
@@ -239,23 +247,16 @@ private:
 
   template<class GetDispatchKeyFunc>
   const DispatchTableEntry& lookup_(const GetDispatchKeyFunc& getDispatchKey) const {
-    return kernels_.map<const DispatchTableEntry&>(
-      [&] (const detail::KernelTable_& table) -> const DispatchTableEntry& {
+    const detail::KernelTable_& table = kernels_.left();
         // We have a dispatch table. Find the correct kernel for the inputs and return it.
         TensorTypeId dispatch_key = getDispatchKey();
         auto found = table.lookup(dispatch_key);
 
-        TORCH_CHECK(nullptr != found, "Didn't find kernel to dispatch to for operator '", operator_name_,
-                 "'. Tried to look up kernel for dispatch key '", toString(dispatch_key),
-                 "'. Registered dispatch keys are: ", listAllDispatchKeys());
+        //TORCH_CHECK(nullptr != found, "Didn't find kernel to dispatch to for operator '", operator_name_,
+        //         "'. Tried to look up kernel for dispatch key '", toString(dispatch_key),
+        //         "'. Registered dispatch keys are: ", listAllDispatchKeys());
 
         return *found;
-      },
-      [] (const DispatchTableEntry& entry) -> const DispatchTableEntry& {
-        // We have a catch-all kernel. Just return it.
-        return entry;
-      }
-    );
   }
 
   // kernels_ either contains a dispatch table or

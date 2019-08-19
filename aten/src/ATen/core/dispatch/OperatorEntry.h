@@ -6,6 +6,7 @@
 #include <list>
 
 namespace c10 {
+
 namespace impl {
   class OperatorEntry;
 }
@@ -47,14 +48,14 @@ public:
     // TODO Should we box and call the boxed kernel instead of failing?
     TORCH_CHECK(nullptr != unboxed_kernel_, "Tried to call OpKernel::callUnboxed() for a kernel that doesn't have an unboxed version.");
 
-    using OpSignature = Result (c10::KernelCache*, Args...);
+    using OpSignature = Result (Args...);
     OpSignature* kernel = reinterpret_cast<OpSignature*>(unboxed_kernel_);
-    return (*kernel)(cache_.get(), std::forward<Args>(args)...);
+    return (*kernel)(std::forward<Args>(args)...);
   }
 
 private:
   explicit OpKernel(KernelFunction* kernel, const KernelCacheCreatorFunction& cache_creator, void* unboxed_kernel)
-  : kernel_(kernel), cache_(cache_creator ? cache_creator() : nullptr), unboxed_kernel_(unboxed_kernel) {}
+  : kernel_(kernel), cache_(nullptr), unboxed_kernel_(unboxed_kernel) {}
   friend class impl::OperatorEntry;
 
   KernelFunction* kernel_; // can be nullptr, not all kernels have this
@@ -95,6 +96,16 @@ public:
 
   void* lookupUnboxedAutogradKernel() const {
     return currentUnboxedAutogradKernel_;
+  }
+
+  template<class Result, class... Args>
+  inline Result callUnboxedAutogradKernel(Args... args) const {
+    void* unboxed_autograd_kernel = lookupUnboxedAutogradKernel();
+    TORCH_CHECK(nullptr != unboxed_autograd_kernel, "Tried to call Dispatcher::callUnboxedAutogradKernel() for operator ", toString(schema_), " that doesn't have an autograd kernel.");
+
+    using OpSignature = Result (Args...);
+    OpSignature* kernel = reinterpret_cast<OpSignature*>(unboxed_autograd_kernel);
+    return (*kernel)(std::forward<Args>(args)...);
   }
 
   void prepareForDeregistration();

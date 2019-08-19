@@ -251,12 +251,23 @@ namespace detail {
     static_assert(std::is_same<ReturnType, typename guts::infer_function_traits_t<KernelFunctor>::return_type>::value, "Return type mismatch");
     static_assert(std::is_same<guts::typelist::typelist<ParameterTypes...>, typename guts::infer_function_traits_t<KernelFunctor>::parameter_types>::value, "Parameter types mismatch");
 
-    static ReturnType call(KernelCache* cache, ParameterTypes... args) {
+    static ReturnType call(KernelCache* cache, const ParameterTypes&... args) {
       KernelFunctor* functor = static_cast<KernelFunctor*>(cache);
-      return (*functor)(std::forward<ParameterTypes>(args)...);
+      return (*functor)(args...);
     }
   };
   template<class KernelFunctor> using wrap_kernel_functor_unboxed = wrap_kernel_functor_unboxed_<KernelFunctor, typename guts::infer_function_traits_t<KernelFunctor>::func_type>;
+
+  template<class KernelFunctor, class OpSignature> struct __wrap_kernel_functor_unboxed_ final {};
+  template<class KernelFunctor, class ReturnType, class... ParameterTypes> struct __wrap_kernel_functor_unboxed_<KernelFunctor, ReturnType(ParameterTypes...)> final {
+    static_assert(std::is_same<ReturnType, typename guts::infer_function_traits_t<KernelFunctor>::return_type>::value, "Return type mismatch");
+    static_assert(std::is_same<guts::typelist::typelist<ParameterTypes...>, typename guts::infer_function_traits_t<KernelFunctor>::parameter_types>::value, "Parameter types mismatch");
+
+    static ReturnType call(const ParameterTypes&... args) {
+      return KernelFunctor::call(args...);
+    }
+  };
+  template<class KernelFunctor> using __wrap_kernel_functor_unboxed = __wrap_kernel_functor_unboxed_<KernelFunctor, typename guts::infer_function_traits_t<KernelFunctor>::func_type>;
 
   template<class KernelFunctor, class... Args>
   class KernelFactory final {

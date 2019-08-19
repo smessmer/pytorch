@@ -150,6 +150,10 @@ public:
     return operatorIterator_->op.options();
   }
 
+  const impl::OperatorEntry& getEntry() const {
+    return operatorIterator_->op;
+  }
+
 private:
   explicit OperatorHandle(std::list<Dispatcher::OperatorDef>::iterator operatorIterator)
   : operatorIterator_(std::move(operatorIterator)) {}

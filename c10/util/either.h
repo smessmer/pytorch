@@ -101,10 +101,10 @@ class either final {
   }
 
   const Left& left() const& {
-    if (C10_UNLIKELY(!is_left())) {
-      throw std::logic_error(
-          "Tried to get left side of an either which is right.");
-    }
+    //if (C10_UNLIKELY(!is_left())) {
+    //  throw std::logic_error(
+    //      "Tried to get left side of an either which is right.");
+    //}
     return _left; // NOLINT(cppcoreguidelines-pro-type-union-access)
   }
   Left& left() & {
@@ -116,10 +116,10 @@ class either final {
   }
 
   const Right& right() const& {
-    if (C10_UNLIKELY(!is_right())) {
-      throw std::logic_error(
-          "Tried to get right side of an either which is left.");
-    }
+    //if (C10_UNLIKELY(!is_right())) {
+    //  throw std::logic_error(
+    //      "Tried to get right side of an either which is left.");
+    //}
     return _right; // NOLINT(cppcoreguidelines-pro-type-union-access)
   }
   Right& right() & {

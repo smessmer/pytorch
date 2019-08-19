@@ -11,13 +11,37 @@ namespace detail {
   template<class FuncType, FuncType* kernel_func, class ReturnType, class... Parameters>
   class WrapKernelFunction_<FuncType, kernel_func, ReturnType, guts::typelist::typelist<Parameters...>> final : public c10::OperatorKernel {
   public:
-    auto operator()(Parameters... args) -> decltype((*kernel_func)(std::forward<Parameters>(args)...)) {
+    static auto call(Parameters... args) -> decltype((*kernel_func)(std::forward<Parameters>(args)...)) {
       return (*kernel_func)(std::forward<Parameters>(args)...);
+    }
+    auto operator()(Parameters... args) -> decltype((*kernel_func)(std::forward<Parameters>(args)...)) {
+      return call(std::forward<Parameters>(args)...);
     }
   };
   template<class FuncType, FuncType* kernel_func, class Enable = guts::enable_if_t<guts::is_function_type<FuncType>::value>>
   struct WrapKernelFunction final {
     using type = WrapKernelFunction_<
+        FuncType,
+        kernel_func,
+        typename guts::function_traits<FuncType>::return_type,
+        typename guts::function_traits<FuncType>::parameter_types
+    >;
+  };
+
+  template<class FuncType, FuncType* kernel_func, class ReturnType, class ParameterList> class __WrapKernelFunction_ {};
+  template<class FuncType, FuncType* kernel_func, class ReturnType, class... Parameters>
+  class __WrapKernelFunction_<FuncType, kernel_func, ReturnType, guts::typelist::typelist<Parameters...>> final : public c10::OperatorKernel {
+  public:
+    static auto call(const Parameters&... args) -> decltype((*kernel_func)(args...)) {
+      return (*kernel_func)(args...);
+    }
+    auto operator()(const Parameters&... args) -> decltype((*kernel_func)(args...)) {
+      return call(args...);
+    }
+  };
+  template<class FuncType, FuncType* kernel_func, class Enable = guts::enable_if_t<guts::is_function_type<FuncType>::value>>
+  struct __WrapKernelFunction final {
+    using type = __WrapKernelFunction_<
         FuncType,
         kernel_func,
         typename guts::function_traits<FuncType>::return_type,
