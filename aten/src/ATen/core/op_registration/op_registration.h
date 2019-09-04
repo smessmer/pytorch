@@ -199,7 +199,7 @@ public:
       static_assert(!std::is_same<FuncType, KernelFunction>::value, "Tried to register a stackbased (i.e. internal) kernel function using the public kernel<...>() API. Please either use the internal kernel(...) API or also implement the kernel function as defined by the public API.");
       static_assert(kernel_func != nullptr, "Kernel function cannot be nullptr");
 
-      return std::move(*this).kernelFunctorUnboxedOnly<FuncType, kernel_func>(dispatch_key);
+      return std::move(*this).kernelFunctorUnboxedOnly<typename detail::WrapKernelFunction<FuncType, kernel_func>::type>(dispatch_key);
     }
 
     // TODO Remove impl_unboxedOnlyCatchAllKernel once all of aten can generate boxed kernels
@@ -209,7 +209,7 @@ public:
       static_assert(!std::is_same<FuncType, KernelFunction>::value, "Tried to register a stackbased (i.e. internal) kernel function using the public kernel<...>() API. Please either use the internal kernel(...) API or also implement the kernel function as defined by the public API.");
       static_assert(kernel_func != nullptr, "Kernel function cannot be nullptr");
 
-      return std::move(*this).kernelFunctorUnboxedOnly<FuncType, kernel_func>(c10::nullopt);
+      return std::move(*this).kernelFunctorUnboxedOnly<typename detail::WrapKernelFunction<FuncType, kernel_func>::type>(c10::nullopt);
     }
 
     /**
@@ -314,14 +314,14 @@ public:
       );
     }
 
-    template<class FuncType, FuncType* kernel_func>
-    Options&& kernelFunctorUnboxedOnly(c10::optional<TensorTypeId>&& dispatch_key) && {
+    template<class KernelFunctor, class... ConstructorParameters>
+    Options&& kernelFunctorUnboxedOnly(c10::optional<TensorTypeId>&& dispatch_key, ConstructorParameters&&... constructorParameters) && {
       return std::move(*this).kernel(
         std::move(dispatch_key),
         nullptr,
-        nullptr,
-        reinterpret_cast<void*>(&detail::__WrapKernelFunction<FuncType, kernel_func>::type::call),
-        detail::FunctionSchemaInferer<typename detail::__WrapKernelFunction<FuncType, kernel_func>::type>()()
+        nullptr, // setting cache creator to nullptr so calling the kernel doesn't need to call it, which would be expensive
+        reinterpret_cast<void*>(&detail::wrap_kernel_functor_unboxed<KernelFunctor>::call),
+        detail::FunctionSchemaInferer<KernelFunctor>()()
       );
     }
 

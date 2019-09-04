@@ -48,9 +48,9 @@ public:
     // TODO Should we box and call the boxed kernel instead of failing?
     TORCH_CHECK(nullptr != unboxed_kernel_, "Tried to call OpKernel::callUnboxed() for a kernel that doesn't have an unboxed version.");
 
-    using OpSignature = Result (Args...);
+    using OpSignature = Result (c10::KernelCache*, Args...);
     OpSignature* kernel = reinterpret_cast<OpSignature*>(unboxed_kernel_);
-    return (*kernel)(std::forward<Args>(args)...);
+    return (*kernel)(cache_.get(), std::forward<Args>(args)...);
   }
 
 private:
